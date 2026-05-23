@@ -1,4 +1,4 @@
-"""FastAPI app for Azetta — MVP endpoints.
+"""FastAPI app for CULTINI — MVP endpoints.
 
   POST /ask                          question -> response + sources + metrics
   POST /chat                         routed, context-aware chat (per-chat memory)
@@ -36,7 +36,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Azetta", description="RAG anti-lissage — artisanat amazigh", lifespan=lifespan)
+app = FastAPI(title="CULTINI", description="RAG anti-lissage — artisanat amazigh", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -71,9 +71,9 @@ class AskResponse(BaseModel):
 
 class CompareResponse(BaseModel):
     question: str
-    azetta: AskResponse
+    cultini: AskResponse
     baseline: AskResponse
-    coverage_delta: float  # azetta - baseline, en points de cultural_coverage.percent
+    coverage_delta: float  # cultini - baseline, en points de cultural_coverage.percent
 
 
 class ChatRequest(BaseModel):
@@ -132,7 +132,7 @@ def ask(req: AskRequest) -> AskResponse:
 
 @app.post("/compare", response_model=CompareResponse)
 def compare(req: AskRequest) -> CompareResponse:
-    """Détecteur de lissage : même question -> Azetta (RAG) vs Gemini brut, côte à côte."""
+    """Détecteur de lissage : même question -> CULTINI (RAG) vs Gemini brut, côte à côte."""
     try:
         azetta = rag.ask(req.question)
         baseline = rag.ask_baseline(req.question)
@@ -145,7 +145,7 @@ def compare(req: AskRequest) -> CompareResponse:
     )
     return CompareResponse(
         question=req.question,
-        azetta=AskResponse(**azetta),
+        cultini=AskResponse(**azetta),
         baseline=AskResponse(**baseline),
         coverage_delta=delta,
     )

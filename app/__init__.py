@@ -1,1 +1,1 @@
-"""Azetta backend — RAG anti-lissage sur l'artisanat amazigh."""
+"""CULTINI backend — RAG anti-lissage sur l'artisanat amazigh."""

@@ -1,6 +1,6 @@
-# Azetta — Developer Documentation
+# CULTINI — Developer Documentation
 
-Comprehensive developer guide for the `azetta-backend` (RAG anti-lissage for Amazigh craft knowledge).
+Comprehensive developer guide for the CULTINI backend (package: `azetta-backend`) — RAG anti-lissage for Amazigh craft knowledge.
 
 This document covers architecture, setup, ingestion, runtime, API reference, internals (MMR + constitution), data model, contribution moderation flow, deployment notes, metrics, and troubleshooting. Diagrams are provided as Mermaid blocks and can be rendered by GitHub/VS Code Preview.
 
@@ -16,7 +16,7 @@ This document covers architecture, setup, ingestion, runtime, API reference, int
 
 ## 1. Overview
 
-Azetta is a retrieval-augmented system designed to answer questions about Amazigh crafts and traditions while avoiding cultural "lissage" (smoothing). It uses:
+CULTINI is a retrieval-augmented system designed to answer questions about Amazigh crafts and traditions while avoiding cultural "lissage" (smoothing). It uses:
 
 - LlamaIndex (core) for node and index abstractions
 - Gemini (Google GenAI) as LLM and embeddings
@@ -189,7 +189,7 @@ Recommended verification steps after ingest:
 
 ### 12.1 Architecture (components & data flow)
 
-This section provides a professional, operational view of Azetta's architecture: components, responsibilities, interfaces, data flows, failure modes, scaling considerations, and observability hooks. The goal is to give engineering teams the level of detail needed to operate, extend, and harden the system.
+This section provides a professional, operational view of CULTINI's architecture: components, responsibilities, interfaces, data flows, failure modes, scaling considerations, and observability hooks. The goal is to give engineering teams the level of detail needed to operate, extend, and harden the system.
 
 Core concepts:
 

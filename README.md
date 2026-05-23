@@ -1,6 +1,6 @@
 # cultini — Backend (short)
 
-Developer-focused backend for Azetta (RAG anti-lissage on Amazigh craft knowledge).
+Developer-focused backend for CULTINI (RAG anti-lissage on Amazigh craft knowledge).
 
 See the full developer documentation at [docs/README.md](docs/README.md).
 

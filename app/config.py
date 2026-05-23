@@ -1,4 +1,4 @@
-"""Central configuration for Azetta.
+"""Central configuration for CULTINI.
 
 Loads environment, defines all tunable constants in one place, and provides
 ``configure_settings()`` which wires the Gemini LLM and embeddings into

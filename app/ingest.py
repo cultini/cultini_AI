@@ -189,7 +189,7 @@ def promote_contribution(contribution: dict, index: VectorStoreIndex) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Ingest the Azetta corpus into Qdrant.")
+    parser = argparse.ArgumentParser(description="Ingest the CULTINI corpus into Qdrant.")
     parser.add_argument("--force", action="store_true", help="Drop and rebuild the collection.")
     args = parser.parse_args()
 
