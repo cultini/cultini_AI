@@ -281,4 +281,132 @@ If you want to extend the backend:
 
 ---
 
+## 15. Deep Architecture and Component Responsibilities
+
+This section documents each runtime component, its responsibilities, and runtime interactions.
+
+- `FastAPI` (`app/main.py`): HTTP surface, request validation (Pydantic), startup `lifespan` that pre-warms the index, DBs and global settings. Keep this layer as thin as possible — business logic lives in `app/rag.py`, `app/ingest.py`, and `app/moderation.py`.
+- `RAG service` (`app/rag.py`): orchestrates retrieval, MMR-based diversity re-ranking, and answer synthesis under the `CULTURAL_CONSTITUTION` prompt. Exposes `ask()`, `ask_baseline()` and `ask_routed()` for different flows.
+- `Index` (LlamaIndex VectorStoreIndex backed by Qdrant): stores `TextNode`s built from `corpus/*.json`. Retrieval is performed via `index.as_retriever()`.
+- `Qdrant` (embedded or remote): persistent vector store. Embedded mode is simpler for single-developer runs; remote mode enables multiple worker processes.
+- `Gemini` (LLM + embeddings): used for both embeddings and text completion. Injected into LlamaIndex via `app/config.configure_settings()`.
+- `Moderation` and `Contributions` (`app/moderation.py`, `app/contributions.py`): implement auto-filtering, duplicate detection, persistence of submissions, and expert workflows.
+- `Metrics` (`app/metrics.py`): computes cultural coverage and other signals used to explain anti-lissage performance.
+
+### Inter-component contracts
+
+- Embeddings: `Settings.embed_model` must produce vectors of size `EMBED_DIM`. If the dimensionality changes, recreate the Qdrant collection with `--force`.
+- Node IDs: a deterministic UUID derived from `fiche.id` (`app/ingest.fiche_uuid`) is used as the point id so re-ingestion upserts.
+
+## 16. MMR and Math (why it matters)
+
+MMR (Maximal Marginal Relevance) trades off relevance against redundancy to produce a diverse set of sources. Implementation details live in `app/rag.py::mmr_rerank`.
+
+Let $q$ be the query embedding and $c_i$ candidate embeddings. The MMR selection greedily maximizes:
+
+$$\text{score}(i) = \lambda \cdot \text{sim}(q, c_i) - (1-\lambda) \cdot \max_{j\in S} \text{sim}(c_i, c_j)$$
+
+where $S$ is the set of already-selected indices, $\text{sim}$ is cosine similarity, and $\lambda\in[0,1]$ is `MMR_LAMBDA` (higher = more relevance, lower = more diversity).
+
+Practical tips:
+
+- `OVERFETCH_K` should be >= `SIMILARITY_TOP_K` * 3 to give MMR room to pick diverse items. The project defaults (`OVERFETCH_K=15`, `SIMILARITY_TOP_K=5`) are a good starting point.
+- Tune `MMR_LAMBDA` between 0.5 and 0.8. Lower values increase novelty but risk off-topic picks; higher values reduce diversity.
+
+## 17. Embedding & Vector Store Considerations
+
+- Embedding model output dimensionality must match `EMBED_DIM`. If you change model, set `EMBED_DIM` accordingly and re-run `app.ingest --force`.
+- Qdrant collection metadata keeps `fiche_id` for human-readable citation; Qdrant point ids are stable UUIDs.
+- For large corpora, consider chunking fiches into smaller nodes. This repo intentionally uses one fiche → one node for provenance clarity.
+
+## 18. Tuning Guide
+
+Small checklist when results look "too averaged" (lissage):
+
+1. Decrease `MMR_LAMBDA` to favor diversity (e.g., 0.5).
+2. Increase `OVERFETCH_K` to allow the reranker more candidates (e.g., 20).
+3. Lower `ROUTER_SCORE_THRESHOLD` only if the router is falsely rejecting relevant queries.
+4. Inspect `source_nodes` returned for a few queries to confirm regional variety.
+
+## 19. API Reference (detailed)
+
+All request/response validation is defined in `app/main.py` using Pydantic models. Key schemas:
+
+- `AskRequest`: `{ question: str }`
+- `AskResponse`: `{ response: str, source_nodes: list[SourceNode], metrics: dict }`
+- `SourceNode`: `{ id, titre, region, source, categorie, fiabilite, score }`
+
+Example `curl` call (ask):
+
+```bash
+curl -sS -X POST http://localhost:8000/ask \
+  -H 'Content-Type: application/json' \
+  -d '{"question":"Comment se fait la teinture naturelle de l'azetta ?"}'
+```
+
+Python client example (requests):
+
+```python
+import requests
+
+resp = requests.post('http://localhost:8000/ask', json={'question': 'Que signifie yaz dans le tissage?'})
+print(resp.json())
+```
+
+## 20. Example response (sanitized)
+
+```json
+{
+  "response": "Le yaz est un motif en forme de losange... (cited)",
+  "source_nodes": [
+    {"id":"bijou_argent_tiznit","titre":"La fibule...","region":"Tiznit","score":0.8321},
+    {"id":"motif_yaz","titre":"Motif yaz","region":"Kabylie","score":0.7214}
+  ],
+  "metrics": {"cultural_coverage": {"percent": 72.3}}
+}
+```
+
+## 21. Testing & CI
+
+Recommendations for automated checks:
+
+- Add a small pytest suite that validates `app.ingest.load_fiches()` can read `corpus/` files and that `app.ingest.build_nodes()` produces `TextNode`-like dictionaries. Use mocking/stubbing for embeddings/Qdrant in CI.
+- Include a docs build check (markdownlint) and a Mermaid syntax check (optional) in GitHub Actions.
+
+Example GitHub Actions matrix step (pseudo):
+
+```yaml
+name: CI
+on: [push, pull_request]
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with: {python-version: '3.12'}
+      - name: Install deps
+        run: pip install -r requirements-dev.txt
+      - name: Run tests
+        run: pytest -q
+```
+
+## 22. Advanced Troubleshooting
+
+- Mermaid render errors on GitHub: keep node labels simple (avoid unescaped backticks, parentheses, slashes). If a complex label is required, place it in a separate caption paragraph and use a short node id in the diagram.
+- Qdrant embedded lock: error like "database locked" means another process has the embedded store open. Stop other uvicorn/ingest processes before restarting. For CI, mock Qdrant or use a networked Qdrant instance.
+- Gemini / LlamaIndex falling back to OpenAI: ensure `app.config.configure_settings()` is called before any LlamaIndex operations and that `GEMINI_API_KEY` is present.
+
+## 23. Security & Privacy
+
+- Do not log sensitive user-provided data. The current code records feedback and contributions intentionally — ensure PII is handled according to your privacy policy.
+- API keys: keep `.env` out of git; use secrets in production. In GitHub Actions, store `GEMINI_API_KEY` as a repository secret.
+
+## 24. What's Next (suggestions)
+
+- Add end-to-end integration tests with a small local Qdrant server to validate retrieval + MMR semantics.
+- Add an `examples/` folder with sample `curl` and Python scripts for every endpoint.
+- Export Mermaid diagrams as PNGs into `docs/diagrams/` for platforms that don't render Mermaid.
+
 End of developer documentation.
