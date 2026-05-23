@@ -189,16 +189,88 @@ Recommended verification steps after ingest:
 
 ### 12.1 Architecture (components & data flow)
 
+This section provides a professional, operational view of Azetta's architecture: components, responsibilities, interfaces, data flows, failure modes, scaling considerations, and observability hooks. The goal is to give engineering teams the level of detail needed to operate, extend, and harden the system.
+
+Core concepts:
+
+- Single-process, embedded Qdrant is the default developer experience (simple, on-disk). Production deployments should prefer a networked Qdrant instance and stateless application instances for horizontal scaling.
+- The RAG service implements the anti-lissage behaviour: overfetch -> MMR re-rank -> synthesize under the `CULTURAL_CONSTITUTION` prompt.
+- Source provenance is first-class: one fiche -> one `TextNode` (no chunking) to preserve citation clarity.
+
+Component responsibilities (detailed):
+
+- `Client` - any HTTP client (frontend app, CLI, integration tests). Responsible for authentication (if enabled), request validation and rendering responses.
+- `API` (`app/main.py`) - validates inputs (Pydantic), enforces CORS, wires lifecycle tasks (`configure_settings`, DB init, warm index), and delegates business logic to service modules. Keep it minimal; unit-test the controllers.
+- `RAG` (`app/rag.py`) - retrieval, MMR re-ranking, constitution-driven synthesis. Exposes `ask()`, `ask_baseline()`, `ask_routed()`.
+- `Index` (LlamaIndex VectorStoreIndex) - abstraction over vector store. Responsible for retrieval semantics and converting nodes to LlamaIndex objects.
+- `VectorStore` (Qdrant) - persistent vector storage. Handles nearest-neighbour search and storage of vector+metadata.
+- `Embeddings & LLM` (Gemini via LlamaIndex Settings) - generate embeddings and completions. Must be configured early by `app/config.configure_settings()`.
+- `Ingest` (`app/ingest.py`) - corpus validation, node construction, deterministic point ids, and index build/rebuild orchestration.
+- `Moderation & Contributions` (`app/moderation.py`, `app/contributions.py`) - auto-screening, duplicate detection, persistence of submissions, and promotion flow that writes new `corpus/*.json` and upserts nodes into the live index.
+- `Feedback` & `Metrics` (`app/feedback.py`, `app/metrics.py`) - collect human feedback (votes, corrections) and compute cultural-coverage metrics used for monitoring and evaluation.
+- Optional infra: `Worker` (background jobs for heavy tasks), `Observability` (Prometheus exporters, structured logs), and `CI/CD` pipelines that run tests and docs checks.
+
+Interfaces and contracts
+
+- REST API: JSON over HTTP; schemas in `app/main.py` are the canonical contract.
+- Vector contract: embeddings must be `EMBED_DIM`-dimensional floats. The Qdrant collection must be created to match that dimensionality.
+- Referential stability: `fiche_id` is persisted as metadata and a deterministic UUID is used as the Qdrant point id so re-ingestion upserts.
+
+Data flow (high-level):
+
+1. Developer / user triggers ingestion or the API receives a question.
+2. `app/ingest` validates `corpus/*.json`, constructs `TextNode`s, and writes vectors to Qdrant.
+3. On query: API → RAG → Index retriever overfetches → candidates returned by Qdrant → MMR re-ranker selects diverse subset → LLM synthesizes under constitution → API returns response + sources + metrics.
+
+Failure modes & mitigations
+
+- Qdrant embedded lock: detect and fail fast on startup if path is locked; in production prefer networked Qdrant.
+- Missing API key / wrong embedding dim: `configure_settings()` raises a clear error, surfaced at app startup by the `lifespan` hook.
+- LLM timeouts: wrap LLM calls with timeouts and return a user-facing error; consider a short-circuit cache for common queries.
+
+Scaling & operational considerations
+
+- For read-heavy workloads, run multiple stateless API replicas and use remote Qdrant for shared vector storage.
+- For write-heavy ingestion flows, run sequential ingestion or a dedicated ingest worker to avoid competing writes against an embedded store.
+- Monitor latency and coverage metrics (`app/metrics`) to detect degradation of cultural-coverage over time.
+
+Observability
+
+- Structured logs: include request ids, route, and top-k retrieval scores when returning responses.
+- Metrics: instrument counts for `ask` calls, `ask_routed` decisions (direct vs cultural), average retrieval latency, and `cultural_coverage` percent. Export via Prometheus.
+- Tracing: capture span for retrieval (Qdrant), embedding calls, MMR rerank, and LLM synth to diagnose hotspots.
+
+Security
+
+- Hide GEMINI keys; require them via env/secret manager. Rate-limit public endpoints and add authentication for contribution moderation endpoints.
+
 ```mermaid
-graph LR
-  A["Client"] -->|HTTP| B["FastAPI — app/main.py"]
-  B --> C["RAG service — app/rag.py"]
-  C --> D["Retriever — LlamaIndex index"]
-  D --> E["Qdrant — embedded or remote"]
-  C --> F["Gemini LLM & Embeddings"]
-  B --> G["Feedback DB — app/feedback.py"]
-  B --> H["Contributions DB — app/contributions.py"]
+flowchart LR
+  Client["Client (frontend / CLI / integration)"] -->|HTTP JSON| API["FastAPI — app/main.py"]
+  subgraph AppLayer[Application Layer]
+    API --> RAG["RAG service — app/rag.py"]
+    API --> FeedbackDB["Feedback DB — app/feedback.py"]
+    API --> ContribDB["Contributions DB — app/contributions.py"]
+  end
+  subgraph RetrievalLayer[Retrieval & Index]
+    RAG --> Retriever["Retriever (LlamaIndex)"]
+    Retriever --> Index["Index (VectorStoreIndex)"]
+    Index --> Qdrant["Qdrant (embedded or remote)"]
+  end
+  subgraph ModelLayer[Model Layer]
+    RAG --> Gemini["Gemini: embeddings + LLM"]
+  end
+  subgraph Infra[Optional Infra]
+    IngestCLI["Ingest CLI — app/ingest.py"] --> Index
+    Worker["Background Worker (optional)"] --> Index
+    Observability["Prometheus / Grafana / Tracing"]
+  end
+  Qdrant ---|metadata| ContribDB
+  Qdrant ---|vectors| Observability
 ```
+
+Notes on the diagram: node labels are intentionally short and quoted so Markdown renderers (GitHub) accept them. For operational diagrams include network egress rules, firewall ports for remote Qdrant (typically 6333) and any ingress load-balancer configuration.
+
 
 ### 12.2 Sequence: POST /ask → RAG → Response
 
