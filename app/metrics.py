@@ -3,7 +3,7 @@
 - Cultural Coverage: of the whole corpus's cultural vocabulary (the union of
   every fiche's ``elements_culturels`` + ``termes_amazighs``), what fraction
   does a given answer actually mobilise? This is the headline metric: ask the
-  same question to a generic LLM and to Azetta, measure both, compare.
+    same question to a generic LLM and to CULTINI, measure both, compare.
 - Distinct-n: ratio of unique n-grams — lexical richness / anti-repetition.
 - Self-BLEU proxy: average pairwise n-gram overlap across several answers to the
   SAME prompt. Low = diverse generations = anti-lissage. We use a Jaccard-on-

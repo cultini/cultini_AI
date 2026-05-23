@@ -20,7 +20,7 @@ from app import config, ingest, metrics
 # --- The cultural constitution: the anti-lissage system prompt. ---
 # Must contain {context_str} and {query_str}. Never use LlamaIndex's default.
 CULTURAL_CONSTITUTION = PromptTemplate(
-    "Tu es Azetta, un assistant specialiste de l'artisanat amazigh (berbere).\n"
+    "Tu es CULTINI, un assistant specialiste de l'artisanat amazigh (berbere).\n"
     "Tu reponds UNIQUEMENT a partir des sources fournies ci-dessous.\n\n"
     "CONSTITUTION CULTURELLE (regles imperatives) :\n"
     "1. N'utilise que les informations du contexte. Si l'information n'y est pas, "
@@ -158,7 +158,7 @@ def ask_baseline(question: str) -> dict:
 
     C'est le temoin de lissage — ce qu'un assistant generique repond sans
     ancrage culturel. La seule difference avec ask() est l'absence de RAG +
-    constitution, donc l'ecart de metriques isole exactement l'apport d'Azetta.
+    constitution, donc l'ecart de metriques isole exactement l'apport de CULTINI.
     Renvoie ``{response, source_nodes, metrics}`` ; source_nodes est toujours [].
     """
     config.configure_settings()
@@ -172,7 +172,7 @@ def ask_baseline(question: str) -> dict:
 
 
 DIRECT_NOTICE = (
-    "Reponse generee directement par le modele, sans source du corpus culturel Azetta."
+    "Reponse generee directement par le modele, sans source du corpus culturel CULTINI."
 )
 
 
@@ -182,7 +182,7 @@ def _format_history(history: list[dict] | None) -> str:
         return ""
     lines = []
     for turn in history:
-        speaker = "Utilisateur" if turn.get("role") == "user" else "Azetta"
+        speaker = "Utilisateur" if turn.get("role") == "user" else "CULTINI"
         lines.append(f"{speaker}: {turn.get('content', '')}")
     return "Historique de la conversation :\n" + "\n".join(lines)
 
