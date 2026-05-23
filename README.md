@@ -5,7 +5,6 @@ RAG anti-lissage sur l'artisanat amazigh. Stack : **LlamaIndex + Gemini + Qdrant
 ## Setup
 
 ```bash
-cd AzzetaBackend
 uv sync                       # install pinned deps from uv.lock
 cp .env.example .env          # then put your GEMINI_API_KEY in .env
 ```
