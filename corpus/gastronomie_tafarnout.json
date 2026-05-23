@@ -1,0 +1,11 @@
+{
+  "id": "gastronomie_tafarnout",
+  "categorie": "gastronomie",
+  "titre": "Le pain tafarnout (tafarnout / afarnou)",
+  "contenu": "Le tafarnout, aussi appelé afarnou ou tabornoucht, est le pain « du four » en berbère. C'est le pain quotidien et l'aliment de base des régions du Souss, du Haut-Atlas et de la région de Zagora, notamment autour de Taroudant et d'Agadir. Les femmes le préparent dans de grands plats en terre cuite, parfois dans les socles des tajines, et le cuisent traditionnellement dans un four en terre qui lui donne son goût caractéristique. Dans le Souss, le tafarnout est servi avec les tajines et sert lui-même de couvert pour saisir les aliments. Il s'accompagne du lidam, un assortiment présenté dans de petites assiettes : huile d'argan, amlou (pâte d'amandes grillées mêlée d'huile d'argan), oudi (beurre clarifié au thym), huile d'olive et différentes sortes de miel ; l'invité y trempe son pain. Bien plus qu'un aliment, le tafarnout est un symbole de partage et d'hospitalité : on le déchire et on le partage à la main.",
+  "region": "Souss, Haut-Atlas, Zagora, Taroudant, Agadir (Maroc)",
+  "termes_amazighs": ["tafarnout", "afarnou", "tabornoucht", "lidam", "amlou", "oudi"],
+  "elements_culturels": ["tafarnout", "pain du four", "four en terre", "lidam", "amlou", "oudi", "huile d'argan", "hospitalite", "partage"],
+  "source": "ABAVBA (aba-vba.org) ; Wikipedia (Cuisine berbere) ; VisitRuralMorocco",
+  "fiabilite": "a_verifier"
+}

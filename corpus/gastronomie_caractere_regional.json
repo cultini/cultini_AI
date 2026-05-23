@@ -1,0 +1,11 @@
+{
+  "id": "gastronomie_caractere_regional",
+  "categorie": "gastronomie",
+  "titre": "Le caractère régional de la cuisine amazighe (anwal amazigh)",
+  "contenu": "La cuisine amazighe, en berbère anwal amazigh, est une cuisine traditionnelle ancestrale commune aux Berbères d'Afrique du Nord. Elle a peu évolué au cours du temps mais diffère fortement d'une région à l'autre selon les ressources agricoles locales. Il n'existe pas de cadre culinaire amazigh unique et standardisé : l'historien de l'alimentation Ken Albala note qu'il est impossible de décrire des repas comme « typiquement berbères » — au mieux ce sont des échantillons de ce qui se mange selon les régions par les familles berbères. Chaque plat possède donc une identité et un goût distincts liés à sa région d'origine. Exemple concret : les Zayanes de la région de Khénifra, dans le Moyen-Atlas, ont une cuisine d'une grande simplicité, fondée sur le blé, l'orge, le maïs, le lait de brebis et de chèvre, le beurre, le miel, la viande et le gibier. Parmi leurs plats festifs figurent le takricht, à base de tripes enroulées avec les intestins sur un bâton de chêne et cuites sur la braise, et le méchoui, mouton entier rôti dans un four artisanal et réservé aux festivités. Répondre à une question sur « la cuisine berbère » par une moyenne unique efface cette diversité régionale.",
+  "region": "Afrique du Nord ; exemple : Khenifra, Moyen-Atlas (Maroc)",
+  "termes_amazighs": ["anwal amazigh", "takricht", "amazigh"],
+  "elements_culturels": ["cuisine amazighe", "diversite regionale", "Zayanes", "Khenifra", "takricht", "mechoui", "orge", "gibier", "plat festif"],
+  "source": "Wikipedia (Berber cuisine, citant Ken Albala) ; moroccancuisine.over-blog.com",
+  "fiabilite": "a_verifier"
+}

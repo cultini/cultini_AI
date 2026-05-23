@@ -1,0 +1,11 @@
+{
+  "id": "gastronomie_pains_regionaux",
+  "categorie": "gastronomie",
+  "titre": "Les pains et galettes régionaux (aghroum)",
+  "contenu": "Le pain occupe une place centrale dans la cuisine amazighe et se décline en de nombreuses formes régionales, chacune avec son nom propre — preuve qu'il n'existe pas un « pain berbère » unique. L'aghroum est un petit pain présent à presque tous les repas, en accompagnement ou fourré à la viande. La tamtunt est une galette levée kabyle, faite de farine, d'eau et de sel. La tartunt désigne des galettes aux œufs préparées en Kabylie orientale dans le cadre de la célébration du printemps. La tafdarth, ou aharcha, est une petite galette rifaine de semoule d'orge et de miel, très consommée au nord du Maroc, en particulier pendant le Ramadan. La taguella (ou tagwella en tachelhit) est le pain du désert des Touaregs, cuit sous la cendre. Chaque pain reflète les ressources agricoles locales — orge, blé, maïs — et un usage rituel ou quotidien spécifique à sa région.",
+  "region": "Rif, Kabylie (Algerie), Sahara touareg, Maghreb",
+  "termes_amazighs": ["aghroum", "tamtunt", "tartunt", "tafdarth", "aharcha", "taguella", "tagwella"],
+  "elements_culturels": ["aghroum", "tamtunt", "tartunt", "tafdarth", "taguella", "galette d'orge", "pain du desert", "celebration du printemps", "Ramadan"],
+  "source": "Wikipedia (Cuisine berbere) ; voyage-maroc.com",
+  "fiabilite": "a_verifier"
+}

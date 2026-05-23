@@ -1,0 +1,11 @@
+{
+  "id": "bijou_emaillage",
+  "categorie": "bijou",
+  "titre": "La bijouterie émaillée (taduert)",
+  "contenu": "La fabrication des bijoux amazighs repose depuis l'antiquité sur deux techniques. La première, le moulage et le découpage du bijou, est répandue dans toute l'Afrique du Nord. La seconde, la bijouterie émaillée, consiste à sertir et introduire des pierres et matières — ambre, corail, verroterie — dans le bijou ; c'est une étape délicate dont dépend l'apparence finale de la pièce. Fait géographique notable : cette technique d'émaillage ne se pratique traditionnellement que dans trois régions précises — Tiznit dans le Souss, la grande Kabylie en Algérie, et Djerba en Tunisie. Les styles régionaux diffèrent : dans le Haut-Atlas et à Tiznit les bijoux sont massifs, travaillés au filigrane et à la gravure ; en Kabylie ils mêlent argent travaillé, corail et motifs géométriques vifs ; à Djerba le style est plus fin, avec un usage plus léger des plaques. Lisser ces trois traditions en un « style berbère » unique efface des écoles d'orfèvrerie distinctes.",
+  "region": "Tiznit (Maroc), Grande Kabylie (Algerie), Djerba (Tunisie)",
+  "termes_amazighs": ["amazigh"],
+  "elements_culturels": ["emaillage", "moulage", "filigrane", "gravure", "ambre", "corail", "verroterie", "ecole d'orfevrerie regionale"],
+  "source": "Synthese de sources de vulgarisation (laparuredetiznit.wordpress.com, Les Petites Experiences, Les perles d'aventurine)",
+  "fiabilite": "a_verifier"
+}

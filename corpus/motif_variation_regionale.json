@@ -1,0 +1,11 @@
+{
+  "id": "motif_variation_regionale",
+  "categorie": "motif",
+  "titre": "La variation régionale des motifs (azetta)",
+  "contenu": "Il n'existe pas un seul répertoire de motifs amazighs : chaque région possède ses particularités dans la couleur, la forme et la taille des motifs, la technique de tissage, le matériau utilisé et la forme des nœuds. Une tisseuse connaît une infinité de motifs mais tisse son tapis de façon à ce qu'il réponde à la spécificité de sa tribu — le tissage devient ainsi l'étendard du nom de chaque tribu. Les formes de base sont peu nombreuses (ligne, carré, losange, triangle, chevron, zigzag) mais leur agencement constitue la grammaire d'un langage graphique propre à chaque communauté. Ces mêmes formes géométriques se retrouvent au-delà du tapis : sur les murs des maisons, la poterie, les vêtements, les bijoux, les tatouages et les coffres en bois ou en fer. Réduire ces motifs à une esthétique « berbère » générique efface précisément cette diversité tribale et régionale.",
+  "region": "Maghreb (Maroc, Algerie, Tunisie)",
+  "termes_amazighs": ["azetta", "tazerbyt"],
+  "elements_culturels": ["motif geometrique", "identite tribale", "chevron", "zigzag", "triangle", "langage graphique", "tatouage", "poterie", "specificite regionale"],
+  "source": "Synthese de sources de vulgarisation (chwaya.com, Moroccan Corridor, alksar.com)",
+  "fiabilite": "a_verifier"
+}

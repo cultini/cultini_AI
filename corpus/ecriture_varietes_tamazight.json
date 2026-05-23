@@ -1,0 +1,11 @@
+{
+  "id": "ecriture_varietes_tamazight",
+  "categorie": "ecriture",
+  "titre": "Les variétés du tamazight (tachelhit, tarifit, tamazight central)",
+  "contenu": "Le tamazight n'est pas une langue unique et uniforme : c'est un ensemble de variétés régionales. L'amazighe standard marocain (code ISO 639-3 : zgh) a été développé par l'IRCAM à partir de 2001 en s'appuyant sur les principales variétés du Maroc — le tachelhit (shi) parlé dans le sud et le Souss, le tarifit (rif) parlé dans le Rif, et le tamazight de l'Atlas central (tzm) parlé dans le Moyen-Atlas — ainsi que sur d'autres variantes comme le touareg (tmh). Pour le traitement automatique, le tamazight pose des difficultés réelles : morphologie riche, orthographe complexe et forte variation dialectale. Ce point est essentiel pour un système anti-lissage : un même objet artisanal ou un même plat peut porter un nom différent selon la variété (par exemple la fibule, dite tiseghnest ou tazerzit). Fondre ces noms en une forme moyenne unique appauvrit la couverture culturelle ; les conserver côte à côte la respecte.",
+  "region": "Maroc : Souss (tachelhit), Rif (tarifit), Moyen-Atlas (tamazight central)",
+  "termes_amazighs": ["tamazight", "tachelhit", "tarifit", "touareg", "amazigh"],
+  "elements_culturels": ["variete dialectale", "amazighe standard marocain", "IRCAM", "tachelhit", "tarifit", "tamazight central", "morphologie", "variation linguistique"],
+  "source": "Article academique ACL/WMT 2025 (aclanthology.org/2025.wmt-1.82) ; INALCO",
+  "fiabilite": "partielle"
+}

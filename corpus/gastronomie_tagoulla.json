@@ -1,0 +1,11 @@
+{
+  "id": "gastronomie_tagoulla",
+  "categorie": "gastronomie",
+  "titre": "La tagoulla (tagoulla / tarwayt)",
+  "contenu": "La tagoulla est un plat traditionnel amazigh du sud du Maroc, et plus particulièrement du Souss. Elle est aussi connue sous le nom de tarwayt. C'est une purée à base de semoule d'orge ou de maïs selon les régions, cuite lentement à feu doux pendant plusieurs heures jusqu'à une consistance tendre mais ferme, jamais pâteuse. Selon les régions elle se consomme avec de l'huile d'olive, de l'huile d'argan, du beurre fondu, de l'amlou ou du caillé de fromage blanc. La tagoulla est le plat central du nouvel an amazigh, Idh Yennayer : elle est alors décorée de dattes et d'amandes. La tradition veut qu'un noyau de datte, appelé amnnaz (« le chanceux »), soit dissimulé dans le plat — la personne qui le trouve recevra des bénédictions pour l'année. Le plat symbolise la santé, la longévité et la prospérité.",
+  "region": "Souss (sud du Maroc)",
+  "termes_amazighs": ["tagoulla", "tarwayt", "amnnaz", "Idh Yennayer", "amlou"],
+  "elements_culturels": ["tagoulla", "semoule d'orge", "semoule de mais", "huile d'argan", "amlou", "Idh Yennayer", "nouvel an amazigh", "datte", "prosperite"],
+  "source": "Wikipedia (Tagoulla) ; VisitRuralMorocco",
+  "fiabilite": "a_verifier"
+}

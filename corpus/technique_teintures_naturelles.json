@@ -1,0 +1,11 @@
+{
+  "id": "technique_teintures_naturelles",
+  "categorie": "savoir-faire",
+  "titre": "Les teintures naturelles de la laine",
+  "contenu": "La teinture naturelle est un pilier de l'authenticité du tapis amazigh. Avant la teinture, la laine brute est lavée à l'eau claire, cardée pour retirer les impuretés, puis filée à la main au fuseau ; ce filage traditionnel conserve les huiles naturelles de la laine, ce qui lui donne douceur et résistance. Les couleurs proviennent de plantes tinctoriales de l'Atlas : le henné pour les rouges et les oranges, l'indigo pour les bleus, la garance pour les rouges, le safran pour les jaunes, l'écorce de grenade pour certaines teintes. Ces pigments donnent des nuances vibrantes et durables, sans produit chimique, avec de subtiles variations tonales plutôt qu'une couleur uniforme. Les couleurs ne sont pas choisies au hasard : dans la tradition chaque teinte porte une signification. Aujourd'hui certaines coopératives emploient des teintures modernes pour élargir la palette, tout en conservant le tissage à la main.",
+  "region": "Atlas marocain",
+  "termes_amazighs": [],
+  "elements_culturels": ["teinture naturelle", "henne", "indigo", "garance", "safran", "ecorce de grenade", "cardage", "filage au fuseau", "laine brute"],
+  "source": "Synthese de sources de vulgarisation (tifinaghshop.com, morocco-home.fr)",
+  "fiabilite": "a_verifier"
+}

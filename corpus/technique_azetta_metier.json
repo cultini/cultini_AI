@@ -1,0 +1,11 @@
+{
+  "id": "technique_azetta_metier",
+  "categorie": "technique",
+  "titre": "Le métier à tisser (azetta / imchdn)",
+  "contenu": "Le mot azetta désigne à la fois le métier à tisser et l'art du tissage lui-même. Le métier traditionnel, aussi appelé imchdn en berbère, est un cadre de bois installé verticalement sur lequel les fils sont tendus. La tisseuse tend d'abord les fils de chaîne, maintenus par de petits morceaux de bois ou de métal, puis noue brin par brin la laine autour de la trame selon le nœud berbère, en alternant les couleurs et en modulant la tension pour faire apparaître les motifs. Le travail est entièrement manuel et peut être très long : un tapis Taznakht du Haut-Atlas demande parfois jusqu'à neuf mois. Selon les régions le métier est vertical ou horizontal. La taille des métiers traditionnels en bois posés au sol limite souvent la largeur du tapis à environ deux mètres. Le savoir n'est pas formalisé : il se transmet oralement et par le geste, de mère en fille, sans formation écrite ; certaines techniques de nouage et certaines couleurs sont des secrets de famille.",
+  "region": "Atlas marocain (Haut-Atlas, Moyen-Atlas) ; Taznakht pour le tapis cite",
+  "termes_amazighs": ["azetta", "imchdn", "tazerbyt"],
+  "elements_culturels": ["metier a tisser", "fil de chaine", "fil de trame", "noeud berbere", "transmission orale", "transmission de mere en fille", "tissage vertical", "secret de famille"],
+  "source": "Synthese de sources de vulgarisation (leslosanges.com, tifinaghshop.com, Moroccanzest)",
+  "fiabilite": "a_verifier"
+}

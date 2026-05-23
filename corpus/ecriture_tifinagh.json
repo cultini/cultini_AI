@@ -1,0 +1,11 @@
+{
+  "id": "ecriture_tifinagh",
+  "categorie": "ecriture",
+  "titre": "L'alphabet tifinagh",
+  "contenu": "Le tifinagh est l'alphabet utilisé pour écrire les langues amazighes. C'est une écriture consonantique et géométrique : les lettres sont construites à partir de variations sur quelques figures de base (points, lignes, cercles, croix). L'écriture amazighe ancienne, dite libyque ou libyco-berbère, est attestée sur des stèles funéraires et des sites d'art rupestre ; les recherches récentes orientent vers une origine autochtone, intimement liée à l'art rupestre. Cet usage a disparu à la fin de l'antiquité au nord du Maghreb, tandis que des alphabets tifinagh ont continué à être employés sans interruption par les Touaregs jusqu'à aujourd'hui. Au Maroc, l'IRCAM (Institut Royal de la Culture Amazighe) a adopté officiellement le tifinagh en 2003 : cette version moderne, dite néo-tifinagh ou tifinagh-IRCAM, compte 33 caractères et sert à écrire l'amazighe standard marocain. Son adoption a permis l'enseignement de la langue à l'école et son usage dans l'administration.",
+  "region": "Afrique du Nord ; usage continu chez les Touaregs ; standardisation au Maroc (IRCAM)",
+  "termes_amazighs": ["tifinagh", "amazigh", "tamazight", "Imazighen"],
+  "elements_culturels": ["tifinagh", "neo-tifinagh", "ecriture consonantique", "libyco-berbere", "IRCAM", "art rupestre", "Touaregs", "amazighe standard marocain"],
+  "source": "INALCO (inalco.fr) ; Wikipedia ; IREMAM (CNRS)",
+  "fiabilite": "partielle"
+}

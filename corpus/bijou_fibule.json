@@ -1,0 +1,11 @@
+{
+  "id": "bijou_fibule",
+  "categorie": "bijou",
+  "titre": "La fibule (tiseghnest / tazerzit)",
+  "contenu": "La fibule est une broche en argent massif traditionnellement utilisée par les femmes pour fermer leurs vêtements drapés. Son nom varie selon les régions et les variétés de tamazight : tiseghnest, tazerzit, tizerzai, tazerzit — cette variation est elle-même un marqueur d'appartenance et ne doit pas être uniformisée. Elle se décline en deux grandes formes chargées de sens distincts : la forme triangulaire, qui évoque la fécondité féminine et le foyer, et la forme circulaire ou en disque (tabzimt), liée aux symboles solaires et à l'éternité. Chaque région — Rif, Atlas, Souss, Kabylie — possède son propre style de fibule. La fibule amazighe se distingue par sa taille souvent imposante : certaines pièces triangulaires à tête élargie peuvent peser plus d'un kilogramme. Au-delà de la parure, c'est un talisman, un marqueur de statut social et un héritage familial transmis entre générations.",
+  "region": "Rif, Haut-Atlas, Souss (Maroc), Kabylie (Algerie)",
+  "termes_amazighs": ["tiseghnest", "tazerzit", "tizerzai", "tabzimt", "tamazight"],
+  "elements_culturels": ["fibule", "argent massif", "broche", "fecondite", "symbole solaire", "talisman", "marqueur tribal", "heritage familial"],
+  "source": "Synthese de sources de vulgarisation (Ben Azri, ABC Salles, Les Petites Experiences, terriermichel.wordpress.com)",
+  "fiabilite": "a_verifier"
+}
