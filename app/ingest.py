@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import unicodedata
 import uuid
@@ -89,12 +90,20 @@ def build_nodes(fiches: list[dict]) -> list[TextNode]:
 
 
 def get_client() -> QdrantClient:
-    """Single place that opens the Qdrant client (embedded, on-disk).
+    """Single place that opens the Qdrant client. Two modes, selected by env:
 
-    NOTE: embedded mode takes an exclusive lock on the data dir — run a single
-    process (no ``uvicorn --reload``). To switch to a Docker server, replace
-    with ``QdrantClient(url="http://localhost:6333")``.
+    - Remote (``QDRANT_URL`` set and non-empty): connect to a Qdrant server /
+      Qdrant Cloud over the network, authenticating with ``QDRANT_API_KEY`` if
+      present. Used in production (e.g. Render), where the local filesystem is
+      ephemeral so vectors must live in a persistent remote cluster.
+    - Embedded (``QDRANT_URL`` unset/empty): open the on-disk store at
+      ``config.QDRANT_PATH``. This is the default for local development. NOTE:
+      embedded mode takes an exclusive lock on the data dir — run a single
+      process (no ``uvicorn --reload``).
     """
+    url = os.getenv("QDRANT_URL")
+    if url:
+        return QdrantClient(url=url, api_key=os.getenv("QDRANT_API_KEY") or None, timeout=60)
     config.DATA_DIR.mkdir(parents=True, exist_ok=True)
     return QdrantClient(path=config.QDRANT_PATH)
 

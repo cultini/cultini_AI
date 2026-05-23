@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: cultini-ai
+    runtime: docker
+    plan: free
+    region: frankfurt
+    healthCheckPath: /health
+    envVars:
+      # Secrets / per-environment — set these in the Render dashboard.
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: QDRANT_URL
+        sync: false
+      - key: QDRANT_API_KEY
+        sync: false
+      - key: AZETTA_CORS_ORIGINS
+        sync: false
+      # Model selection — safe to commit.
+      - key: AZETTA_LLM_MODEL
+        value: gemini-2.5-flash
+      - key: AZETTA_EMBED_MODEL
+        value: gemini-embedding-001
