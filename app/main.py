@@ -9,7 +9,7 @@
   GET  /stats                        HITL dashboard numbers + corpus stats
 
 Run (single worker, NO --reload — embedded Qdrant takes an exclusive lock):
-  uv run uvicorn app.main:app --port 8000
+  uv run uvicorn app.main:app --host 0.0.0.0 --port 8000
 """
 
 from __future__ import annotations

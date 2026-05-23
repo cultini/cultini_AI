@@ -32,7 +32,9 @@ uv run python -m app.ingest --force  # drop and rebuild
 > Embedded Qdrant takes an exclusive file lock — run a **single worker, no `--reload`**.
 
 ```bash
-uv run uvicorn app.main:app --port 8000
+# --host 0.0.0.0 so a phone / other device on the LAN can reach it.
+# (Default bind is 127.0.0.1, which is only reachable from this machine.)
+uv run uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
 Open http://localhost:8000/docs.
