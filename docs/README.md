@@ -227,20 +227,20 @@ sequenceDiagram
 
 ```mermaid
 flowchart LR
-  Fiche[corpus/*.json] -->|validated| Builder[app/ingest.build_nodes]
-  Builder --> TextNode[TextNode(id_, text, metadata)]
-  TextNode -->|embed| Vector[embedding vector]
-  Vector --> Qdrant[Qdrant collection 'azetta_fiches']
+  Fiche["corpus/*.json"] -->|validated| Builder["app/ingest.build_nodes"]
+  Builder --> TextNode["TextNode(id_, text, metadata)"]
+  TextNode -->|embed| Vector["embedding vector"]
+  Vector --> Qdrant["Qdrant collection: azetta_fiches"]
 ```
 
 ### 12.4 Deployment (embedded vs server Qdrant)
 
 ```mermaid
 flowchart TB
-  Dev[Developer laptop] -->|embedded| App[FastAPI + embedded Qdrant]
-  App --> Data[data/qdrant_data]
-  Prod[Production] -->|remote qdrant| App2[FastAPI]
-  App2 -->|http| QdrantServer[Qdrant (remote)]
+  Dev[Developer_laptop] -->|embedded| App[FastAPI_embedded_Qdrant]
+  App --> Data[data_qdrant_data]
+  Prod[Production] -->|remote_qdrant| App2[FastAPI_remote]
+  App2 -->|http| QdrantServer[Qdrant_remote]
 ```
 
 ### 12.5 Contribution moderation flow
