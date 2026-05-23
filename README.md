@@ -1,4 +1,4 @@
-# Azetta — Backend
+# cultini — Backend
 
 RAG anti-lissage sur l'artisanat amazigh. Stack : **LlamaIndex + Gemini + Qdrant + FastAPI**, géré avec **uv**.
 
