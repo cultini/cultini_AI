@@ -191,13 +191,13 @@ Recommended verification steps after ingest:
 
 ```mermaid
 graph LR
-  A[Client] -->|HTTP| B[FastAPI `app/main.py`]
-  B --> C[RAG service `app/rag.py`]
-  C --> D[Retriever (LlamaIndex index)]
-  D --> E[Qdrant (embedded / remote)]
-  C --> F[Gemini LLM & Embeddings]
-  B --> G[Feedback DB `app/feedback.py`]
-  B --> H[Contributions DB `app/contributions.py`]
+  A["Client"] -->|HTTP| B["FastAPI — app/main.py"]
+  B --> C["RAG service — app/rag.py"]
+  C --> D["Retriever — LlamaIndex index"]
+  D --> E["Qdrant — embedded or remote"]
+  C --> F["Gemini LLM & Embeddings"]
+  B --> G["Feedback DB — app/feedback.py"]
+  B --> H["Contributions DB — app/contributions.py"]
 ```
 
 ### 12.2 Sequence: POST /ask → RAG → Response
