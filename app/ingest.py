@@ -14,6 +14,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
+import unicodedata
 import uuid
 from pathlib import Path
 
@@ -127,6 +129,63 @@ def build_index(force: bool = False) -> VectorStoreIndex:
     index = VectorStoreIndex(nodes, storage_context=storage_context)
     print(f"Indexed {len(nodes)} fiches into Qdrant collection '{config.COLLECTION_NAME}'.")
     return index
+
+
+def _slugify(text: str) -> str:
+    """ASCII slug for a fiche id/filename, e.g. 'La fibule kabyle' -> 'la_fibule_kabyle'."""
+    norm = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
+    norm = re.sub(r"[^a-zA-Z0-9]+", "_", norm).strip("_").lower()
+    return norm or "fiche"
+
+
+def _unique_fiche_id(slug: str, corpus_dir: Path) -> str:
+    """Ensure the slug doesn't collide with an existing corpus file."""
+    candidate, n = slug, 2
+    while (corpus_dir / f"{candidate}.json").exists():
+        candidate = f"{slug}_{n}"
+        n += 1
+    return candidate
+
+
+def promote_contribution(contribution: dict, index: VectorStoreIndex) -> dict:
+    """Turn an approved contribution into a documented fiche, persist + re-index.
+
+    Steps (the tail of the contribution flow):
+      1. Build a corpus fiche dict (``fiabilite='documentee'``) from the submission.
+      2. Write it to ``corpus/<id>.json`` so it survives a cold rebuild.
+      3. Insert its node into the **live** Qdrant index passed in (the embedded
+         store is single-process; reuse the running index, never open a 2nd client).
+
+    ``contribution`` carries at least: titre, categorie, region, contenu, source.
+    Returns the persisted fiche dict (including its generated ``id``).
+    """
+    config.configure_settings()
+    corpus_dir = config.CORPUS_DIR
+    corpus_dir.mkdir(parents=True, exist_ok=True)
+
+    fiche_id = _unique_fiche_id(_slugify(contribution["titre"]), corpus_dir)
+    fiche = {
+        "id": fiche_id,
+        "categorie": contribution["categorie"],
+        "titre": contribution["titre"],
+        "contenu": contribution["contenu"],
+        "region": contribution["region"],
+        # Expert can enrich these later; empty is valid and keeps the schema intact.
+        "termes_amazighs": contribution.get("termes_amazighs", []),
+        "elements_culturels": contribution.get("elements_culturels", []),
+        "source": contribution["source"],
+        "fiabilite": "documentee",
+    }
+    missing = REQUIRED_FIELDS - fiche.keys()
+    if missing:
+        raise ValueError(f"Cannot promote contribution, missing fields {sorted(missing)}")
+
+    (corpus_dir / f"{fiche_id}.json").write_text(
+        json.dumps(fiche, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    # Re-index: embed + upsert this one node into the live collection.
+    index.insert_nodes(build_nodes([fiche]))
+    return fiche
 
 
 def main() -> None:

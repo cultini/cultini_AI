@@ -1,8 +1,12 @@
-"""FastAPI app for Azetta — three endpoints for the MVP.
+"""FastAPI app for Azetta — MVP endpoints.
 
-  POST /ask       question -> response + sources + anti-lissage metrics
-  POST /feedback  record a vote and/or correction (HITL loop)
-  GET  /stats     HITL dashboard numbers + corpus stats
+  POST /ask                          question -> response + sources + metrics
+  POST /chat                         routed, context-aware chat (per-chat memory)
+  POST /feedback                     record a vote and/or correction (HITL loop)
+  POST /contributions                submit a contribution -> auto-filter + queue
+  GET  /contributions                moderation queue (expert)
+  POST /contributions/{id}/moderate  approve (promote to fiche + re-index) | reject
+  GET  /stats                        HITL dashboard numbers + corpus stats
 
 Run (single worker, NO --reload — embedded Qdrant takes an exclusive lock):
   uv run uvicorn app.main:app --port 8000
@@ -16,7 +20,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from app import config, conversations, feedback, ingest, rag
+from app import config, contributions, conversations, feedback, ingest, moderation, rag
 
 
 @asynccontextmanager
@@ -26,6 +30,7 @@ async def lifespan(app: FastAPI):
     config.configure_settings()
     feedback.init_db()
     conversations.init_db()
+    contributions.init_db()
     rag.get_referential()
     rag.get_index()
     yield
@@ -36,6 +41,7 @@ app = FastAPI(title="Azetta", description="RAG anti-lissage — artisanat amazig
 app.add_middleware(
     CORSMiddleware,
     allow_origins=config.CORS_ORIGINS,
+    allow_origin_regex=config.CORS_ORIGIN_REGEX,  # any localhost port (Flutter web dev)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -91,6 +97,27 @@ class FeedbackRequest(BaseModel):
     vote: str | None = Field(None, pattern="^(up|down)$")
     reason: str | None = None
     correction: str | None = None
+
+
+class ContributionRequest(BaseModel):
+    titre: str = Field(..., min_length=3)
+    categorie: str = Field(..., min_length=1)
+    region: str = Field(..., min_length=1)        # wilaya / région d'origine
+    contenu: str = Field(..., min_length=1)
+    source: str = Field(..., min_length=1)
+    contributor_name: str | None = None
+
+
+class ContributionResponse(BaseModel):
+    id: int
+    status: str               # 'pending' | 'auto_rejected'
+    accepted: bool            # True when it entered the human queue (status == pending)
+    message: str
+    flags: dict
+
+
+class ModerationRequest(BaseModel):
+    decision: str = Field(..., pattern="^(approve|reject)$")
 
 
 # --- Endpoints ---
@@ -154,6 +181,72 @@ def submit_feedback(req: FeedbackRequest) -> dict:
         correction=req.correction,
     )
     return {"status": "ok", "id": fid}
+
+
+# --- Contribution flow ---
+@app.post("/contributions", response_model=ContributionResponse)
+def submit_contribution(req: ContributionRequest) -> ContributionResponse:
+    """Public submission endpoint (the 'Contribuer' button).
+
+    Runs the auto-filter (spam / doublon / contenu IA), enqueues the result in
+    the moderation queue, and tells the client whether it was accepted into the
+    queue or auto-rejected.
+    """
+    flags = moderation.screen(req.titre, req.contenu)
+    status, message = moderation.decide_status(flags)
+    contrib_id = contributions.insert_contribution(
+        titre=req.titre,
+        categorie=req.categorie,
+        region=req.region,
+        contenu=req.contenu,
+        source=req.source,
+        contributor_name=req.contributor_name,
+        status=status,
+        flags=flags,
+    )
+    return ContributionResponse(
+        id=contrib_id,
+        status=status,
+        accepted=status == "pending",
+        message=message,
+        flags=flags,
+    )
+
+
+@app.get("/contributions")
+def list_contributions(status: str | None = None, limit: int = 100) -> dict:
+    """Moderation queue listing for an expert (optionally filter by status)."""
+    return {
+        "contributions": contributions.list_contributions(status=status, limit=limit),
+        "stats": contributions.get_stats(),
+    }
+
+
+@app.post("/contributions/{contrib_id}/moderate")
+def moderate_contribution(contrib_id: int, req: ModerationRequest) -> dict:
+    """Expert validation. ``approve`` promotes the submission to a documented
+    fiche and re-indexes Qdrant; ``reject`` just records the decision."""
+    contrib = contributions.get_contribution(contrib_id)
+    if contrib is None:
+        raise HTTPException(status_code=404, detail="Contribution introuvable.")
+    if contrib["status"] not in ("pending", "auto_rejected"):
+        raise HTTPException(
+            status_code=409,
+            detail=f"Déjà modérée (statut: {contrib['status']}).",
+        )
+
+    if req.decision == "reject":
+        contributions.set_status(contrib_id, "rejected")
+        return {"status": "rejected", "id": contrib_id}
+
+    try:
+        fiche = ingest.promote_contribution(contrib, rag.get_index())
+    except Exception as exc:  # surface indexing/embedding failures cleanly
+        raise HTTPException(status_code=500, detail=f"Échec de l'indexation : {exc}") from exc
+    # New fiche changed the corpus → drop cached referential so coverage reflects it.
+    rag.get_referential.cache_clear()
+    contributions.set_status(contrib_id, "approved", fiche_id=fiche["id"])
+    return {"status": "approved", "id": contrib_id, "fiche_id": fiche["id"]}
 
 
 @app.get("/stats")

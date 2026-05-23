@@ -45,6 +45,18 @@ OVERFETCH_K = 15         # candidates pulled before MMR diversity re-rank
 MMR_LAMBDA = 0.6         # 1.0 = pure relevance, 0.0 = pure diversity
 TEMPERATURE = 0.9        # high temperature breaks "average"/smoothed answers
 
+# --- Contributions / auto-moderation ---
+# A submission whose best cosine similarity to an existing fiche is >= this is
+# treated as a near-duplicate ("doublon") and auto-rejected. Calibrated against
+# live Gemini query-vs-document scores: a verbatim re-submission scores ~0.92,
+# while the nearest *different* fiche on the same topic scores ~0.73 — so 0.85
+# sits in the gap, catching genuine duplicates without flagging related content.
+DUPLICATE_SCORE_THRESHOLD = float(os.getenv("AZETTA_DUPLICATE_THRESHOLD", "0.85"))
+# Minimum body length (chars) below which a submission is treated as spam.
+SPAM_MIN_CONTENT_LEN = int(os.getenv("AZETTA_SPAM_MIN_CONTENT_LEN", "30"))
+# Maximum number of URLs tolerated in title+body before flagging spam.
+SPAM_MAX_LINK_COUNT = int(os.getenv("AZETTA_SPAM_MAX_LINK_COUNT", "2"))
+
 # --- Agentic router / chat ---
 # Retrieval-score gate: if the best candidate's similarity is below this, the
 # corpus has nothing relevant and we answer with the bare LLM instead of RAG.
@@ -56,7 +68,19 @@ ROUTER_SCORE_THRESHOLD = float(os.getenv("AZETTA_ROUTER_THRESHOLD", "0.6"))
 CHAT_HISTORY_TURNS = int(os.getenv("AZETTA_CHAT_HISTORY_TURNS", "6"))
 
 # --- API ---
-CORS_ORIGINS = ["http://localhost:3000"]  # future Next.js frontend
+# Explicit allowed origins (comma-separated via env). Kept for production where
+# you pin the real frontend origin(s).
+CORS_ORIGINS = [
+    o.strip()
+    for o in os.getenv("AZETTA_CORS_ORIGINS", "http://localhost:3000").split(",")
+    if o.strip()
+]
+# Flutter web (and other local dev frontends) serve from a random localhost port,
+# so a fixed origin list can't cover them. This regex allows any localhost /
+# 127.0.0.1 port for the CORS preflight while keeping non-local origins pinned.
+CORS_ORIGIN_REGEX = os.getenv(
+    "AZETTA_CORS_ORIGIN_REGEX", r"https?://(localhost|127\.0\.0\.1)(:\d+)?"
+)
 
 
 def require_api_key() -> str:
