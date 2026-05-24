@@ -1,6 +1,6 @@
 # cultini_AI —  RAG backend
 
-RAG service for **Cultini / **, focused on documenting and amplifying Amazigh
+RAG service for **Cultini**, focused on documenting and amplifying Amazigh
 (Berber) craftsmanship without flattening it. It answers questions strictly from a
 curated corpus under a "cultural constitution" prompt, measures how much cultural
 detail each answer preserves, and runs a moderated pipeline for community
