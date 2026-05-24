@@ -1,7 +1,7 @@
 """FastAPI app for CULTINI — MVP endpoints.
 
   POST /ask                          question -> response + sources + metrics
-  POST /chat                         routed, context-aware chat (per-chat memory)
+  POST /chat                         routed, context-aware chat (per-chat memory), SSE stream
   POST /feedback                     record a vote and/or correction (HITL loop)
   POST /contributions                submit a contribution -> auto-filter + queue
   GET  /contributions                moderation queue (expert)
@@ -14,13 +14,15 @@ Run (single worker, NO --reload — embedded Qdrant takes an exclusive lock):
 
 from __future__ import annotations
 
+import json
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from app import config, contributions, conversations, feedback, ingest, moderation, rag
+from app import config, contributions, conversations, feedback, ingest, metrics, moderation, rag
 
 
 @asynccontextmanager
@@ -79,16 +81,6 @@ class CompareResponse(BaseModel):
 class ChatRequest(BaseModel):
     chat_id: str = Field(..., min_length=1)
     question: str = Field(..., min_length=1)
-
-
-class ChatResponse(BaseModel):
-    chat_id: str
-    response: str
-    source_nodes: list[SourceNode]
-    metrics: dict
-    route: str                 # 'cultural' | 'direct'
-    router_score: float
-    notice: str | None = None  # set only when route == 'direct'
 
 
 class FeedbackRequest(BaseModel):
@@ -151,17 +143,59 @@ def compare(req: AskRequest) -> CompareResponse:
     )
 
 
-@app.post("/chat", response_model=ChatResponse)
-def chat(req: ChatRequest) -> ChatResponse:
-    """Routed, context-aware chat: agentic gate (RAG vs bare LLM) + per-chat memory."""
+def _sse(event: dict) -> str:
+    """Serialise one SSE ``data:`` frame (single-line JSON + blank-line terminator)."""
+    return "data: " + json.dumps(event, ensure_ascii=False, separators=(",", ":")) + "\n\n"
+
+
+@app.post("/chat")
+def chat(req: ChatRequest) -> StreamingResponse:
+    """Routed, context-aware chat streamed as SSE: meta -> token* -> done.
+
+    Agentic gate (RAG vs bare LLM) + per-chat memory. The ``meta`` event carries
+    the route, router score and (cultural path) the sources; ``token`` events
+    carry incremental text deltas; ``done`` carries the metrics computed on the
+    full answer. Turns are persisted AFTER the stream so stored text matches what
+    the client received.
+    """
     history = conversations.get_history(req.chat_id, limit=config.CHAT_HISTORY_TURNS)
-    try:
-        result = rag.ask_routed(req.question, history)
-    except Exception as exc:  # surface a clean error to the client
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
-    conversations.append_turn(req.chat_id, "user", req.question)
-    conversations.append_turn(req.chat_id, "assistant", result["response"], route=result["route"])
-    return ChatResponse(chat_id=req.chat_id, **result)
+
+    def event_stream():
+        try:
+            meta, token_iter = rag.ask_routed_stream(req.question, history)
+        except Exception as exc:  # surface a clean error to the client
+            yield _sse({"type": "error", "detail": str(exc)})
+            return
+
+        yield _sse({"type": "meta", "chat_id": req.chat_id, **meta})
+
+        chunks: list[str] = []
+        try:
+            for delta in token_iter:
+                if not delta:
+                    continue
+                chunks.append(delta)
+                yield _sse({"type": "token", "delta": delta})
+        except Exception as exc:
+            yield _sse({"type": "error", "detail": str(exc)})
+            return
+
+        full_text = "".join(chunks)
+        conversations.append_turn(req.chat_id, "user", req.question)
+        conversations.append_turn(req.chat_id, "assistant", full_text, route=meta["route"])
+        yield _sse(
+            {"type": "done", "metrics": metrics.response_metrics(full_text, list(rag.get_referential()))}
+        )
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",  # disable proxy buffering (nginx / Render)
+            "Connection": "keep-alive",
+        },
+    )
 
 
 @app.get("/chat/{chat_id}/history")
