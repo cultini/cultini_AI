@@ -1,0 +1,11 @@
+.git
+.env
+__pycache__/
+*.pyc
+.venv/
+docs/
+
+# Stale embedded store + ephemeral SQLite — production uses Qdrant Cloud.
+# (Do NOT ignore corpus/ — those JSON fiches are the source of truth.)
+data/qdrant_data/
+data/feedback.db
