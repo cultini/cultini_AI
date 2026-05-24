@@ -9,6 +9,7 @@ Marginal Relevance, then synthesize over the diversified subset.
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from functools import lru_cache
 
 import numpy as np
@@ -125,6 +126,28 @@ def _synthesize_cultural(
     return str(response), selected
 
 
+def _synthesize_cultural_stream(
+    retrieval_q: str, candidates: list[NodeWithScore]
+) -> tuple[Iterator[str], list[NodeWithScore]]:
+    """Streaming twin of ``_synthesize_cultural``.
+
+    Runs the same MMR selection synchronously (so the selected sources are known
+    up front, for the ``meta`` event) but returns a *lazy* token generator that
+    drives the LLM only as it is consumed. Returns ``(token_iter, selected)``.
+    """
+    query_emb = Settings.embed_model.get_query_embedding(retrieval_q)
+    cand_texts = [c.node.get_content() for c in candidates]
+    cand_embs = Settings.embed_model.get_text_embedding_batch(cand_texts)
+    keep = mmr_rerank(query_emb, cand_embs, k=config.SIMILARITY_TOP_K, lambda_=config.MMR_LAMBDA)
+    selected = [candidates[i] for i in keep]
+
+    synthesizer = get_response_synthesizer(
+        text_qa_template=CULTURAL_CONSTITUTION, streaming=True
+    )
+    streaming_response = synthesizer.synthesize(retrieval_q, nodes=selected)
+    return streaming_response.response_gen, selected
+
+
 def ask(question: str) -> dict:
     """Answer a question with diversified, sourced retrieval + the constitution.
 
@@ -237,6 +260,54 @@ def ask_routed(question: str, history: list[dict] | None = None) -> dict:
         "router_score": round(top_score, 4),
         "notice": None,
     }
+
+
+def ask_routed_stream(
+    question: str, history: list[dict] | None = None
+) -> tuple[dict, Iterator[str]]:
+    """Streaming twin of ``ask_routed``.
+
+    Returns ``(meta, token_iter)`` where ``meta`` is known synchronously
+    (``{route, router_score, source_nodes}``) so the caller can emit it before
+    any tokens, and ``token_iter`` yields text deltas lazily as the LLM
+    generates. On the direct path the iterator first yields ``DIRECT_NOTICE``
+    (with a blank line) so the "unsourced" disclaimer lands inline in the
+    accumulated/persisted answer text.
+    """
+    config.configure_settings()
+    history_block = _format_history(history)
+    contextual_q = f"{history_block}\n\nQuestion : {question}" if history_block else question
+
+    index = get_index()
+    retriever = index.as_retriever(similarity_top_k=config.OVERFETCH_K)
+
+    # Gate on the BARE question (same rationale as ask_routed).
+    gate_candidates = retriever.retrieve(question)
+    top_score = max((c.score or 0.0) for c in gate_candidates) if gate_candidates else 0.0
+
+    if not gate_candidates or top_score < config.ROUTER_SCORE_THRESHOLD:
+        meta = {
+            "route": "direct",
+            "router_score": round(top_score, 4),
+            "source_nodes": [],
+        }
+
+        def _direct_gen() -> Iterator[str]:
+            yield DIRECT_NOTICE + "\n\n"
+            for chunk in Settings.llm.stream_complete(contextual_q):
+                if chunk.delta:
+                    yield chunk.delta
+
+        return meta, _direct_gen()
+
+    candidates = retriever.retrieve(contextual_q) if history_block else gate_candidates
+    token_iter, selected = _synthesize_cultural_stream(contextual_q, candidates)
+    meta = {
+        "route": "cultural",
+        "router_score": round(top_score, 4),
+        "source_nodes": [_source_payload(n) for n in selected],
+    }
+    return meta, token_iter
 
 
 if __name__ == "__main__":
